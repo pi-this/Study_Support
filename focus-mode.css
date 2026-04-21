@@ -1,0 +1,10 @@
+/* Example: Hiding a common sidebar or recommended video section */
+.focus-mode-active #secondary, 
+.focus-mode-active .sidebar, 
+.focus-mode-active #ads {
+  display: none !important;
+}
+
+.focus-mode-active body {
+  background-color: #f0f0f0; /* Optional: change theme for focus */
+}

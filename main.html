@@ -1,0 +1,27 @@
+<body style="width: 220px; padding: 10px; font-family: sans-serif;">
+  <h3>Study Support</h3>
+  
+  <label for="modeSelect"><strong>Current Mode:</strong></label>
+  <select id="modeSelect" style="width: 100%; margin-top: 5px;">
+    <option value="off">Off (Browsing)</option>
+    <option value="spanish">Spanish Mode</option>
+    <option value="animation">Animation Mode</option>
+    <!-- ADD THIS LINE BELOW -->
+    <option value="custom">Custom Mode</option>
+  </select>
+
+  <!-- Move the custom settings inside the body -->
+  <div id="customSettings" style="display:none; margin-top: 10px; background: #f9f9f9; padding: 5px; border-radius: 4px;">
+    <label><strong>Custom Safe Site:</strong></label>
+    <input type="text" id="customSiteInput" placeholder="example.com" style="width: 70%;">
+    <button id="addCustomSite">Add</button>
+    <ul id="customSiteList" style="font-size: 11px; color: #555; padding-left: 15px;"></ul>
+  </div>
+
+  <hr>
+  <h4>Saved Spanish Words</h4>
+  <ul id="vocabListDisplay" style="max-height: 100px; overflow-y: auto; padding-left: 20px;"></ul>
+  <button id="clearList">Clear All Words</button>
+
+  <script src="popup.js"></script>
+</body>
