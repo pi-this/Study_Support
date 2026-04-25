@@ -1,13 +1,13 @@
 {
-  "name": "Studdy Support",
-  "version": "1.0",
   "manifest_version": 3,
-  "permissions": ["tabs", "storage", "contextMenus"],
-  "background": {
-    "service_worker": "background.js"
-  },
+  "name": "Study Support",
+  "version": "1.0",
+  "permissions": ["storage", "tabs", "contextMenus"],
+  "incognito": "spanning",
   "action": {
     "default_popup": "main.html"
+  },
+  "background": {
+    "service_worker": "background.js"
   }
-
 }
