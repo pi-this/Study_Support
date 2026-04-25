@@ -7,55 +7,104 @@ const listContainer = document.getElementById('vocabListDisplay');
 const clearListBtn = document.getElementById('clearList');
 const addCustomSiteBtn = document.getElementById('addCustomSite');
 
-// 1. INITIAL LOAD: Pull everything from storage when popup opens
+// New Timer Elements (from the previous main.html update)
+const taskDisplay = document.getElementById('current-task-display');
+const timerDisplay = document.getElementById('timer-display');
+const progressBar = document.getElementById('progress-bar');
+
+const workSequence = ["spanish", "animation"];
+const GOAL_SECONDS = 3600;
+
+// At the top with your other element references
+const resetTimerBtn = document.getElementById('resetTimerBtn');
+
+// Add the reset functionality
+resetTimerBtn.addEventListener('click', () => {
+  if (confirm("Are you sure you want to reset your study progress and start Spanish mode over?")) {
+    chrome.storage.local.set({
+      currentSequenceIndex: 0,
+      secondsElapsed: 0,
+      unlocked: false,
+      currentMode: 'spanish' 
+    }, () => {
+      // Immediately tell background.js to enforce the rules for Spanish mode
+      chrome.runtime.sendMessage({ action: "checkTabsImmediately" });
+      updateTimerUI(); // Refresh the progress bar immediately
+    });
+  }
+});
+
+// 1. TIMER & LOCK LOGIC: Runs every second
+function updateTimerUI() {
+  chrome.storage.local.get(['secondsElapsed', 'currentSequenceIndex', 'unlocked'], (data) => {
+    if (data.unlocked) {
+      taskDisplay.innerText = "All Tasks Complete!";
+      timerDisplay.innerText = "Unlocked";
+      progressBar.style.width = "100%";
+      progressBar.style.background = "#28a745";
+      modeSelect.disabled = false; // Enable dropdown
+    } else {
+      const currentTask = workSequence[data.currentSequenceIndex] || "spanish";
+      const remaining = GOAL_SECONDS - (data.secondsElapsed || 0);
+      const mins = Math.floor(remaining / 60);
+      const secs = remaining % 60;
+
+      taskDisplay.innerText = currentTask.charAt(0).toUpperCase() + currentTask.slice(1);
+      timerDisplay.innerText = `${mins}:${secs.toString().padStart(2, '0')} remaining`;
+      progressBar.style.width = `${((data.secondsElapsed || 0) / GOAL_SECONDS) * 100}%`;
+      
+      // FORCE the dropdown to match the required work mode
+      modeSelect.value = currentTask;
+      modeSelect.disabled = true; 
+      customSettings.style.display = 'none'; // Hide custom settings while locked
+    }
+  });
+}
+
+
+
+
+// 2. INITIAL LOAD: Pull vocab and custom sites
 chrome.storage.local.get({
   currentMode: 'off',
   vocabList: [],
-  customSites: []
+  customSites: [],
+  unlocked: false
 }, (data) => {
-  // Set the dropdown to the saved mode
-  modeSelect.value = data.currentMode;
-  
-  // Show or hide the custom input box based on the loaded mode
-  customSettings.style.display = (data.currentMode === 'custom') ? 'block' : 'none';
-  
-  // Display the saved Spanish words
+  if (data.unlocked) {
+    modeSelect.value = data.currentMode;
+    customSettings.style.display = (data.currentMode === 'custom') ? 'block' : 'none';
+  }
   renderVocab(data.vocabList);
-  
-  // Display the custom safe sites list
   renderCustomSites(data.customSites);
 });
 
-// 2. MODE CHANGE: Handle when the user picks a different study mode
+// 3. MODE CHANGE: Only allowed if data.unlocked is true (handled by updateTimerUI)
 modeSelect.addEventListener('change', () => {
   const newMode = modeSelect.value;
-  
-  // Show/Hide the custom site input section
   customSettings.style.display = (newMode === 'custom') ? 'block' : 'none';
   
-  // Save mode and tell background.js to close illegal tabs immediately
   chrome.storage.local.set({ currentMode: newMode }, () => {
     chrome.runtime.sendMessage({ action: "checkTabsImmediately" });
   });
 });
 
-// 3. CUSTOM SITES: Add a new site to your custom whitelist
+// --- KEEP YOUR EXISTING HELPER FUNCTIONS BELOW ---
+
 addCustomSiteBtn.addEventListener('click', () => {
   const site = customInput.value.trim().toLowerCase();
   if (site) {
     chrome.storage.local.get({ customSites: [] }, (data) => {
       const newList = [...data.customSites, site];
       chrome.storage.local.set({ customSites: newList }, () => {
-        customInput.value = ''; // Clear input
+        customInput.value = '';
         renderCustomSites(newList);
-        // Trigger cleanup in case a newly forbidden tab is open
         chrome.runtime.sendMessage({ action: "checkTabsImmediately" });
       });
     });
   }
 });
 
-// 4. DISPLAY HELPERS: Functions to update the HTML lists
 function renderVocab(list) {
   listContainer.innerHTML = '';
   list.forEach(word => {
@@ -72,42 +121,31 @@ function renderCustomSites(sites) {
     li.style.display = "flex";
     li.style.justifyContent = "space-between";
     li.style.marginBottom = "3px";
-    
-    li.innerHTML = `
-      <span>${site}</span>
-      <button class="remove-site" data-index="${index}" style="padding: 0 5px; cursor: pointer;">x</button>
-    `;
-    
+    li.innerHTML = `<span>${site}</span><button class="remove-site" data-index="${index}">x</button>`;
     customList.appendChild(li);
   });
 
-  // Add click listeners to all the 'x' buttons
   document.querySelectorAll('.remove-site').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const indexToRemove = e.target.getAttribute('data-index');
-      removeSite(indexToRemove);
-    });
+    btn.addEventListener('click', (e) => removeSite(e.target.getAttribute('data-index')));
   });
 }
 
-// Function to actually remove the site from storage
 function removeSite(index) {
   chrome.storage.local.get({ customSites: [] }, (data) => {
     const newList = data.customSites.filter((_, i) => i != index);
     chrome.storage.local.set({ customSites: newList }, () => {
       renderCustomSites(newList);
-      // Immediately re-run rules in case the removed site was open
       chrome.runtime.sendMessage({ action: "checkTabsImmediately" });
     });
   });
 }
 
-
-// 5. CLEAR LIST: Delete all saved Spanish words
 clearListBtn.addEventListener('click', () => {
-  if (confirm("Are you sure you want to clear your vocab list?")) {
-    chrome.storage.local.set({ vocabList: [] }, () => {
-      renderVocab([]);
-    });
+  if (confirm("Clear vocab list?")) {
+    chrome.storage.local.set({ vocabList: [] }, () => renderVocab([]));
   }
 });
+
+// Start the UI heartbeat
+setInterval(updateTimerUI, 1000);
+updateTimerUI();
