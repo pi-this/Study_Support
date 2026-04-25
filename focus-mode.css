@@ -1,4 +1,4 @@
-/* Example: Hiding a common sidebar or recommended video section */
+/* --- Your Existing Site Content Hiding --- */
 .focus-mode-active #secondary, 
 .focus-mode-active .sidebar, 
 .focus-mode-active #ads {
@@ -6,5 +6,52 @@
 }
 
 .focus-mode-active body {
-  background-color: #f0f0f0; /* Optional: change theme for focus */
+  background-color: #f0f0f0; 
+}
+
+/* --- New UI Elements for the Extension Popup --- */
+#status-container {
+  background: #ffffff;
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+#progress-bar-container {
+  width: 100%;
+  background: #eee;
+  height: 8px;
+  border-radius: 4px;
+  margin: 8px 0;
+  overflow: hidden; /* Keeps the bar inside the rounded corners */
+}
+
+#progress-bar {
+  height: 100%;
+  background: #4caf50; /* Green for progress */
+  width: 0%; 
+  transition: width 0.5s ease;
+}
+
+#timer-display {
+  font-size: 11px;
+  color: #666;
+  text-align: right;
+  font-weight: bold;
+}
+
+/* Gray out the dropdown when locked */
+select:disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+}
+
+button {
+  cursor: pointer;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  padding: 4px 8px;
+  margin-top: 5px;
 }
