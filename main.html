@@ -1,27 +1,50 @@
-<body style="width: 220px; padding: 10px; font-family: sans-serif;">
+<body style="width: 240px; padding: 10px; font-family: sans-serif;">
   <h3>Study Support</h3>
+
+   
+
+  <!-- NEW: Progress & Timer Section -->
+  <div id="status-container" style="background: #f0f7ff; padding: 8px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #cce5ff;">
+    <div style="font-size: 12px; font-weight: bold; margin-bottom: 4px;">
+      Task: <span id="current-task-display" style="color: #004085;">Loading...</span>
+    </div>
+    <div id="progress-bar-container" style="width: 100%; background: #e0e0e0; height: 8px; border-radius: 4px; overflow: hidden;">
+      <div id="progress-bar" style="width: 0%; background: #007bff; height: 100%; transition: width 0.3s;"></div>
+    </div>
+    <div id="timer-display" style="font-size: 11px; text-align: right; margin-top: 4px; color: #555;">60:00 remaining</div>
+  </div>
+
+
+
+  <!-- Inside your <body style="width: 240px; ..."> -->
+  <button id="resetTimerBtn" style="width: 50%; margin-top: 8px; background-color: #ff4d4d; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer;">
+  Reset Task
+  </button>
+</br></br>
+
+
+ 
   
   <label for="modeSelect"><strong>Current Mode:</strong></label>
   <select id="modeSelect" style="width: 100%; margin-top: 5px;">
     <option value="off">Off (Browsing)</option>
     <option value="spanish">Spanish Mode</option>
     <option value="animation">Animation Mode</option>
-    <!-- ADD THIS LINE BELOW -->
     <option value="custom">Custom Mode</option>
   </select>
 
-  <!-- Move the custom settings inside the body -->
+  <!-- Custom settings section -->
   <div id="customSettings" style="display:none; margin-top: 10px; background: #f9f9f9; padding: 5px; border-radius: 4px;">
     <label><strong>Custom Safe Site:</strong></label>
-    <input type="text" id="customSiteInput" placeholder="example.com" style="width: 70%;">
+    <input type="text" id="customSiteInput" placeholder="example.com" style="width: 65%;">
     <button id="addCustomSite">Add</button>
     <ul id="customSiteList" style="font-size: 11px; color: #555; padding-left: 15px;"></ul>
   </div>
 
   <hr>
   <h4>Saved Spanish Words</h4>
-  <ul id="vocabListDisplay" style="max-height: 100px; overflow-y: auto; padding-left: 20px;"></ul>
-  <button id="clearList">Clear All Words</button>
+  <ul id="vocabListDisplay" style="max-height: 100px; overflow-y: auto; padding-left: 20px; font-size: 13px;"></ul>
+  <button id="clearList" style="width: 100%;">Clear All Words</button>
 
   <script src="popup.js"></script>
 </body>
